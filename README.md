@@ -5,7 +5,7 @@
 ![Architecture](https://shields.io)
 ![License](https://shields.io)
 
-Production-grade deployment repository for **The Kurra Matrix of Systemic Metamorphosis**, a unified, conservation-compliant computational framework designed to track, model, and predict non-linear phase inversions across 37 independent dimensions of reality. 
+Production-grade deployment repository for **The Kurra Matrix of Systemic Metamorphosis**, a unified, conservation-compliant computational framework designed to track, model, and predict non-linear phase inversions across 38 independent dimensions of reality. 
 
 Developed by **Jagan Mohan Rao Kurra**, this engine parameterizes multiaxial stress fields, subatomic decay profiles, macroeconomic liquidity constraints, and cellular biological collapses using a normalized, dimensionless scaling metric: **The Kurra Phase Factor (\(K_K\))**. The architecture establishes that complex systems fracture at a hard universal boundary—the **Kurra Boundary Constant (\(\ln(2) \approx 0.6931\))**—where structural order (\(P_o\)) and chaotic volatility (\(P_c\)) reach absolute 50/50 entanglement right before a qualitative polar inversion is enforced.
 
