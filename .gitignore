@@ -1,0 +1,33 @@
+# ==============================================================================
+#  The Kurra Matrix of Systemic Metamorphosis Engine Core
+#  Local System Environment Filter Profile (.gitignore)
+#  
+#  Copyright (c) 2026 Jagan Mohan Rao Kurra. All Rights Reserved.
+# ==============================================================================
+
+# Windows System Temporary Buffers
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Local Compiled C++ Binary Machine Outputs
+*.exe
+*.o
+*.obj
+*.so
+*.dll
+*.dylib
+kurra_test_runner
+matrix_daemon
+avx512_edge_node
+
+# Local Python Runtime Cache Registers
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE Configuration Workspace Folders
+.vscode/
+.vs/
+.idea/

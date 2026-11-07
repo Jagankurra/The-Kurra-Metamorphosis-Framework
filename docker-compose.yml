@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # Master Node: Spawns the underlying shared memory layout and initializes the ticket index fences
+  matrix-master:
+    image: alpine:latest
+    container_name: kurra_matrix_master
+    volumes:
+      - ./opt/edge/matrix/bin:/opt/edge/matrix/bin
+      - shared-numa-bus:/dev/shm
+    working_dir: /opt/edge/matrix/bin
+    command: /bin/sh -c "apk add --no-cache libstdc++ g++ && ./matrix_daemon --master"
+    ipc: "host"
+    privileged: true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+
+  # Worker Node 01: Simulates execution on NUMA Socket 01, pulling 512-bit vector segments from the bus
+  matrix-worker-node1:
+    image: alpine:latest
+    container_name: kurra_matrix_worker_1
+    depends_on:
+      - matrix-master
+    volumes:
+      - ./opt/edge/matrix/bin:/opt/edge/matrix/bin
+      - shared-numa-bus:/dev/shm
+    working_dir: /opt/edge/matrix/bin
+    command: /bin/sh -c "sleep 1 && apk add --no-cache libstdc++ && ./matrix_daemon --worker"
+    ipc: "host"
+    privileged: true
+
+  # Worker Node 02: Simulates execution on NUMA Socket 02, analyzing parallel stress boundaries
+  matrix-worker-node2:
+    image: alpine:latest
+    container_name: kurra_matrix_worker_2
+    depends_on:
+      - matrix-master
+    volumes:
+      - ./opt/edge/matrix/bin:/opt/edge/matrix/bin
+      - shared-numa-bus:/dev/shm
+    working_dir: /opt/edge/matrix/bin
+    command: /bin/sh -c "sleep 1 && apk add --no-cache libstdc++ && ./matrix_daemon --worker"
+    ipc: "host"
+    privileged: true
+
+volumes:
+  shared-numa-bus:
+    driver: local
+    driver_opts:
+      type: "tmpfs"
+      device: "tmpfs"
+      o: "size=128m,rw"
