@@ -12,6 +12,7 @@
 #include <cstdio>
 #include <cstdint>
 #include <cstring>
+#include <array>
 #include <atomic>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -34,7 +35,6 @@ namespace KurraAnalytics {
             serverSocketFd = socket(AF_INET, SOCK_STREAM, 0);
             if (serverSocketFd < 0) return false;
 
-            // Set listening socket to strictly non-blocking so accept() never stalls
             int flags = fcntl(serverSocketFd, F_GETFL, 0);
             if (flags < 0 || fcntl(serverSocketFd, F_SETFL, flags | O_NONBLOCK) < 0) {
                 close(serverSocketFd);
@@ -63,10 +63,6 @@ namespace KurraAnalytics {
             return true;
         }
 
-        /**
-         * Non-blocking poll for incoming Prometheus scrape connections.
-         * Uses fixed stack buffers with zero dynamic heap allocations.
-         */
         void pollScrapeRequests(double liveK, double liveS, uint64_t stateCode) noexcept {
             if (!isExporterActive.load(std::memory_order_relaxed)) return;
 
@@ -74,15 +70,15 @@ namespace KurraAnalytics {
             socklen_t addrLen = sizeof(clientAddr);
 
             int clientSocket = accept(serverSocketFd, reinterpret_cast<struct sockaddr*>(&clientAddr), &addrLen);
-            if (clientSocket < 0) return; // Returns immediately if no scraper is waiting
+            if (clientSocket < 0) return;
 
-            char requestBuffer[256] = {0};
-            ssize_t readBytes = recv(clientSocket, requestBuffer, sizeof(requestBuffer) - 1, MSG_DONTWAIT);
+            std::array<char, 256> requestBuffer{};
+            ssize_t readBytes = recv(clientSocket, requestBuffer.data(), requestBuffer.size() - 1, MSG_DONTWAIT);
 
-            if (readBytes > 0 && std::strstr(requestBuffer, "GET /metrics") != nullptr) {
-                char bodyBuffer[512];
+            if (readBytes > 0 && std::strstr(requestBuffer.data(), "GET /metrics") != nullptr) {
+                std::array<char, 512> bodyBuffer{};
                 int bodyLen = std::snprintf(
-                    bodyBuffer, sizeof(bodyBuffer),
+                    bodyBuffer.data(), bodyBuffer.size(),
                     "# HELP kurra_matrix_phase_factor_k Dimensionless Kurra Phase Factor\n"
                     "# TYPE kurra_matrix_phase_factor_k gauge\n"
                     "kurra_matrix_phase_factor_k %.6f\n"
@@ -95,18 +91,18 @@ namespace KurraAnalytics {
                     liveK, liveS, static_cast<unsigned long>(stateCode)
                 );
 
-                if (bodyLen > 0 && bodyLen < static_cast<int>(sizeof(bodyBuffer))) {
-                    char responseBuffer[768];
+                if (bodyLen > 0 && bodyLen < static_cast<int>(bodyBuffer.size())) {
+                    std::array<char, 768> responseBuffer{};
                     int totalLen = std::snprintf(
-                        responseBuffer, sizeof(responseBuffer),
+                        responseBuffer.data(), responseBuffer.size(),
                         "HTTP/1.1 200 OK\r\n"
                         "Content-Type: text/plain; version=0.0.4; charset=utf-8\r\n"
                         "Content-Length: %d\r\n"
                         "Connection: close\r\n\r\n%s",
-                        bodyLen, bodyBuffer
+                        bodyLen, bodyBuffer.data()
                     );
-                    if (totalLen > 0 && totalLen < static_cast<int>(sizeof(responseBuffer))) {
-                        send(clientSocket, responseBuffer, static_cast<size_t>(totalLen), MSG_NOSIGNAL);
+                    if (totalLen > 0 && totalLen < static_cast<int>(responseBuffer.size())) {
+                        send(clientSocket, responseBuffer.data(), static_cast<size_t>(totalLen), MSG_NOSIGNAL);
                     }
                 }
             } else {
