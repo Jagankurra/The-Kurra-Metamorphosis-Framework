@@ -35,9 +35,9 @@ int main(int argc, char* argv[]) {
     if (mlockall(MCL_CURRENT | MCL_FUTURE) != 0) {
         std::cerr << "[WARNING] mlockall failed (run with CAP_IPC_LOCK or root for hard real-time).\n";
     }
-#endif
+    // Fixed: Index argv[1] instead of passing the argv pointer array
+    bool isMaster = (argc > 1 && std::strcmp(argv[1], "--master") == 0);
 
-    // Fixed: Check argv[1] safely instead of comparing the argv pointer array
     bool isMaster = (argc > 1 && std::strcmp(argv[1], "--master") == 0);
 
     std::cout << "[DAEMON STARTED] Kurra Matrix Edge Node running in "
