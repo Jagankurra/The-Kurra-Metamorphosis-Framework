@@ -2,44 +2,43 @@ name: The Kurra Matrix Engine CI Pipeline
 
 on:
   push:
-    branches: [ "main", "master", "release/*" ]
+    branches:
+      - main
+      - master
   pull_request:
-    branches: [ "main", "master" ]
+    branches:
+      - main
+      - master
 
 permissions:
   contents: read
 
 jobs:
   build-and-validate-spec:
-    name: C++ Compilation & Boundary Verification
+    name: C++ & Zero-Copy Python Verification
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Install Build Toolchain
+    - name: Verify Headers & Compile Shared Library
       run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential g++-12
-
-    - name: Verify All Headers & Compile Shared Library
-      env:
-        CXX: g++-12
-      run: |
-        $CXX -O3 -std=c++17 -Wall -Wextra -fsyntax-only opt/edge/matrix/bin/Avx512TensorProcessor.hpp
-        $CXX -O3 -std=c++17 -Wall -Wextra -fsyntax-only opt/edge/matrix/bin/KurraPrometheusExporter.hpp
-        $CXX -O3 -std=c++17 -Wall -Wextra -fPIC -shared opt/edge/matrix/bin/TensorBridge.cpp -o libtensorbridge.so
+        g++ -O3 -std=c++17 -Wall -Wextra -x c++-header -fsyntax-only opt/edge/matrix/bin/Avx512TensorProcessor.hpp
+        g++ -O3 -std=c++17 -Wall -Wextra -x c++-header -fsyntax-only opt/edge/matrix/bin/KurraPrometheusExporter.hpp
+        g++ -O3 -std=c++17 -Wall -Wextra -fPIC -shared opt/edge/matrix/bin/TensorBridge.cpp -o libtensorbridge.so
 
     - name: Compile Hardened Linux Edge Daemon
-      env:
-        CXX: g++-12
       run: |
-        $CXX -O3 -std=c++17 -Wall -Wextra -pthread opt/edge/matrix/bin/MatrixDaemon.cpp -lrt -o kurra_daemon
+        g++ -O3 -std=c++17 -Wall -Wextra -pthread opt/edge/matrix/bin/MatrixDaemon.cpp -lrt -o kurra_daemon
 
     - name: Compile & Run Boundary Unit Tests
-      env:
-        CXX: g++-12
       run: |
-        $CXX -O3 -std=c++17 -Wall -Wextra -pthread SystemicCoreUnitTests.cpp -o kurra_test_runner
+        g++ -O3 -std=c++17 -Wall -Wextra -pthread SystemicCoreUnitTests.cpp -o kurra_test_runner
         ./kurra_test_runner
+
+    - name: Build & Test Zero-Copy pybind11 Extension
+      run: |
+        python3 -m pip install --upgrade pip pybind11 numpy setuptools
+        pip install .
+        python3 -c "import numpy as np; from kurra_engine import ZeroCopyTensorEngine; e = ZeroCopyTensorEngine(550.0); res = e.process_batch(np.array(((520.0, 490.0, 410.0, 85.0, 70.0, 65.0),), dtype=np.float64)); assert res.item((0, 3)) == 2.0; print('Zero-copy pybind11 test passed!')"
