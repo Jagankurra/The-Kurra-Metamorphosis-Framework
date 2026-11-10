@@ -1,13 +1,11 @@
-# The Kurra Matrix of Systemic Metamorphosis Engine
 # The Kurra Matrix of Systemic Metamorphosis
 
-![C++ Version](https://shields.io)
-![Python Bindings](https://shields.io)
-![SIMD Architecture](https://shields.io)
-![License](https://shields.io)
-[![DOI](https://shields.io)](https://doi.org)
+[![CI Pipeline](https://github.com)](https://github.com)
+[![DOI](https://zenodo.org)](https://doi.org)
+[![License](https://shields.io)](https://opensource.org)
 
 Reference engineering implementation for **The Kurra Matrix of Systemic Metamorphosis**, a dialectical heuristic and unified telemetry normalisation architecture designed to track and anticipate non-linear phase transitions across diverse operational domains.
+
 
 Developed by **Jagan Mohan Rao Kurra**, this framework draws on classical dialectical principles—specifically the unity of opposing tendencies and the transformation of quantitative accumulation into qualitative change—to translate disparate domain stresses into a single, dimensionless utilisation ratio: **The Kurra Phase Factor (\(K_K\))**. By pairing \(K_K\) with a bounded two-state Shannon entropy surrogate scaled to \(\ln(2) \approx 0.6931\), the engine provides systems architects with a uniform alerting scale for real-time anomaly detection.
 
