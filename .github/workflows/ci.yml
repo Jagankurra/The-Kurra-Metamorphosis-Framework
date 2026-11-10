@@ -43,4 +43,4 @@ jobs:
         .venv/bin/pip install --upgrade pip pybind11 numpy
         EXT_SUFFIX=$(.venv/bin/python -c "import sysconfig; print(sysconfig.get_config_var('EXT_SUFFIX'))")
         g++ -O3 -Wall -shared -std=c++17 -fPIC $(.venv/bin/python -m pybind11 --includes) -Iopt/edge/matrix/bin opt/edge/matrix/bin/KurraPyBind.cpp -o "kurra_engine${EXT_SUFFIX}"
-        .venv/bin/python -c "import numpy as np; from kurra_engine import ZeroCopyTensorEngine; e = ZeroCopyTensorEngine(550.0); res = e.process_batch(np.array(((520.0, 490.0, 410.0, 85.0, 70.0, 65.0),), dtype=np.float64)); assert res.item((0, 3)) == 2.0; print('Zero-copy pybind11 test passed!')"
+        .venv/bin/python -c "import numpy as np; from kurra_engine import ZeroCopyTensorEngine; e = ZeroCopyTensorEngine(550.0); res = e.process_batch(np.array(((520.0, 490.0, 410.0, 85.0, 70.0, 65.0), (900.0, 100.0, 100.0, 250.0, 150.0, 100.0)), dtype=np.float64)); assert res.item((0, 3)) == 0.0 and res.item((1, 3)) == 2.0; print('Zero-copy pybind11 test passed!')"
